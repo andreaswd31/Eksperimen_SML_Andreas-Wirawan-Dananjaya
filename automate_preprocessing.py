@@ -9,18 +9,9 @@ from sklearn.compose import ColumnTransformer
 # --- Fungsi-fungsi ---
 
 def load_data(file_path):
-    """Memuat data mentah dari file CSV."""
-    # Kita asumsikan file mentahnya bernama 'healthcare-dataset-stroke-data.csv'
-    # Pastikan file ini ada di repositorimu!
-    raw_data_path = os.path.join(os.path.dirname(file_path), 'healthcare-dataset-stroke-data.csv')
-    
-    # Jika file mentah tidak ada, coba muat dari file yang sudah di-download
-    # Ini hanya untuk fallback, idealnya script ini jalan pakai data mentah
+    raw_data_path = os.path.join(file_path, 'healthcare-dataset-stroke-data.csv')
     if not os.path.exists(raw_data_path):
-        print("Peringatan: File data mentah 'healthcare-dataset-stroke-data.csv' tidak ditemukan.")
-        # Jika kamu ingin skrip ini tetap jalan,
-        # kamu harus meletakkan 'healthcare-dataset-stroke-data.csv' di folder yang sama
-        # Untuk sekarang, kita hentikan jika file mentah tidak ada
+        print(f"Peringatan: File data mentah 'healthcare-dataset-stroke-data.csv' tidak ditemukan di path: {raw_data_path}") 
         raise FileNotFoundError("Pastikan 'healthcare-dataset-stroke-data.csv' ada di folder proyek.")
         
     df = pd.read_csv(raw_data_path)
@@ -28,13 +19,12 @@ def load_data(file_path):
     return df
 
 def preprocess_data(df):
-    """Melakukan semua langkah preprocessing data."""
     print("Memulai preprocessing...")
     
     # 1. Drop kolom 'id'
     df_clean = df.drop('id', axis=1)
     
-    # 2. Handle 'Other' di gender (hanya ada 1 data, jadi kita drop barisnya)
+    # 2. Handle 'Other' di gender 
     df_clean = df_clean[df_clean['gender'] != 'Other']
     print(f"Ukuran data setelah drop 'Other' di gender: {df_clean.shape}")
 
@@ -72,13 +62,13 @@ def preprocess_data(df):
         remainder='passthrough'
     )
 
-    # 5. Terapkan pipeline
+    # 5. Penerapan pipeline
     # Fit dan transform di data latih
     X_train_preprocessed = preprocessor.fit_transform(X_train)
     # Hanya transform di data uji
     X_test_preprocessed = preprocessor.transform(X_test)
 
-    # Ambil nama fitur baru setelah OneHotEncoding
+    # fitur baru setelah OneHotEncoding
     feature_names = preprocessor.get_feature_names_out()
 
     # Ubah hasil array numpy kembali ke DataFrame
@@ -105,18 +95,15 @@ def save_data(train_df, test_df, output_path):
     print(f"2. {test_path}")
 
 # --- Fungsi Utama untuk Menjalankan Skrip ---
-
 if __name__ == "__main__":
     # Dapatkan path direktori di mana skrip ini berada
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Memuat data mentah
-    # Kita asumsikan file mentahnya ada di direktori yang sama
     df_raw = load_data(current_dir)
     
     # Melakukan preprocessing
     df_train, df_test = preprocess_data(df_raw)
     
     # Menyimpan data yang sudah diproses
-    # Kita simpan di direktori yang sama
     save_data(df_train, df_test, current_dir)
