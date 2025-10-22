@@ -8,7 +8,9 @@ on:
       - master
   workflow_dispatch:
 
-# Pekerjaan (Jobs) yang akan dilakukan
+permissions:
+  contents: write
+
 jobs:
   preprocess-and-commit:
     # Menjalankan di server Ubuntu terbaru
