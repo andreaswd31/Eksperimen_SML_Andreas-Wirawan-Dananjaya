@@ -1,0 +1,57 @@
+# Nama workflow
+name: 1. Data Preprocessing Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+# Pekerjaan (Jobs) yang akan dilakukan
+jobs:
+  preprocess-and-commit:
+    # Menjalankan di server Ubuntu terbaru
+    runs-on: ubuntu-latest
+
+    steps:
+      # Langkah 1: Checkout kode dari repositori
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # Langkah 2: Set up Python versi 3.12.7 
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+
+      # Langkah 3: Install semua library yang dibutuhkan
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Langkah 4: Jalankan skrip preprocessing
+      - name: Run preprocessing script
+        run: python automate_preprocessing.py 
+
+      - name: Commit processed data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add train_preprocessed.csv
+          git add test_preprocessed.csv
+          # Cek apakah ada perubahan untuk di-commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Kriteria 1 (Advanced): Update preprocessed datasets"
+            echo "Changes committed."
+          fi
+          
+      # Langkah 6: Push perubahan ke branch
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
